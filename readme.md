@@ -1,3 +1,6 @@
+1. [Instructions - Automated Setup and Run with batch files.](#instructions---automated-setup-and-run-with-batch-files)
+2. [Instructions - Manual Setup and install.](#instructions---manual-setup-and-install)
+
 # Instructions - Automated Setup and Run with batch files.
 ## To Setup
 -  Run `setup.bat` in each folder
