@@ -142,11 +142,11 @@ def main():
     print(f"Server started on Host: {host} and Port: {port}")
 
     authorizer = DummyAuthorizer() # handle permission and user
-    authorizer.add_user("acgadmin", "ftpP@$$w0rd", os.path.join(scriptpath, "data"), perm="adfmwM")
+    authorizer.add_user("acgadmin", "ftpP@$$w0rd", scriptpath + "/data/", perm="adfmwM")
     handler = subclassedHandler #  understand FTP protocol
     handler.authorizer = authorizer
-    handler.certfile = os.path.join(scriptpath, "/FTPSCert/keycert.pem")
-    handler.keyfile = os.path.join(scriptpath, "/FTPSCert/key.pem")
+    handler.certfile = scriptpath + "/FTPSCert/keycert.pem"
+    handler.keyfile = scriptpath + "/FTPSCert/key.pem"
     handler.tls_control_required = True
     handler.tls_data_required = True
     ftpserver = FTPServer(("0.0.0.0", 2121), handler) # bind to high port, port 21 need root permission
