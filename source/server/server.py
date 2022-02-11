@@ -1,8 +1,8 @@
 import socketserver, threading, requests, time, pickle, os
 from requests.auth import HTTPBasicAuth
 from pyftpdlib.authorizers import DummyAuthorizer
-from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
+from pyftpdlib.handlers import TLS_FTPHandler
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP, AES
 from Cryptodome.Util.Padding import pad, unpad
@@ -14,6 +14,7 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
+from urllib3.exceptions import InsecureRequestWarning
 
 scriptpath = os.path.dirname(os.path.abspath(__file__))
 
@@ -25,7 +26,8 @@ APIHOST = '127.0.0.1:5555'
 CIusername = "acgadmin"
 CIpassword = "P@$$w0rd"
 
-CIPubKeyRESP = requests.get(f'http://{APIHOST}/CIPubKey', auth=HTTPBasicAuth(CIusername, CIpassword))
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+CIPubKeyRESP = requests.get(f'https://{APIHOST}/CIPubKey', auth=HTTPBasicAuth(CIusername, CIpassword), verify=False)
 if not CIPubKeyRESP.ok:
     print("Error Connecting/Authenticating with Certificate Issuer")
     exit()
@@ -58,10 +60,10 @@ class Service(socketserver.BaseRequestHandler):
                     cameraID = firstStatus.split(":")[0]
                     serverPubKey, serverPrivKey = generateKeypair()
                     serverPrivKeys[cameraID] = serverPrivKey
-                    pubKeyresponse = requests.post(f'http://{APIHOST}/server-key', json={"clientID": str(cameraID), "serverPubKey": serverPubKey}, auth=HTTPBasicAuth(CIusername, CIpassword))
+                    pubKeyresponse = requests.post(f'https://{APIHOST}/server-key', json={"clientID": str(cameraID), "serverPubKey": serverPubKey}, auth=HTTPBasicAuth(CIusername, CIpassword), verify=False)
                     self.receive("ServerPubKey sent success")
                     if pubKeyresponse.text == "success":
-                        clientCertRESP = requests.get(f'http://{APIHOST}/retr-client-cert/{cameraID}', auth=HTTPBasicAuth(CIusername, CIpassword))
+                        clientCertRESP = requests.get(f'https://{APIHOST}/retr-client-cert/{cameraID}', auth=HTTPBasicAuth(CIusername, CIpassword), verify=False)
                         clientCert = x509.load_pem_x509_certificate(clientCertRESP.json()["cert"].encode(), backend=default_backend())
                         try:
                             CIPubKey.verify(clientCert.signature, clientCert.tbs_certificate_bytes, padding.PKCS1v15(), clientCert.signature_hash_algorithm)
@@ -98,7 +100,7 @@ class Service(socketserver.BaseRequestHandler):
 class ThreadedService(socketserver.ThreadingMixIn, socketserver.TCPServer, socketserver.DatagramRequestHandler):
     pass
 
-class subclassedHandler(FTPHandler):
+class subclassedHandler(TLS_FTPHandler):
     def on_file_received(self, file):
         cameraID = os.path.basename(file).split("_")[0]
         with open(file, "rb+") as f:
@@ -143,6 +145,10 @@ def main():
     authorizer.add_user("acgadmin", "ftpP@$$w0rd", scriptpath + "/data/", perm="adfmwM")
     handler = subclassedHandler #  understand FTP protocol
     handler.authorizer = authorizer
+    handler.certfile = scriptpath + "/keycert.pem"
+    handler.keyfile = scriptpath + "/key.pem"
+    handler.tls_control_required = True
+    handler.tls_data_required = True
     ftpserver = FTPServer(("0.0.0.0", 2121), handler) # bind to high port, port 21 need root permission
     ftpserver.serve_forever()
 

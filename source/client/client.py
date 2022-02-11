@@ -1,8 +1,7 @@
 #SAMPLE KDC ACCOUNT FOR TESTING
 #USERNAME: acgadmin
 #PASSWORD: P@$$w0rd
-
-import base64, time, datetime, ftplib, io, random, hashlib, getpass, requests, socket, os, pickle
+import base64, time, datetime, ftplib, io, random, getpass, requests, socket, os, pickle
 from requests.auth import HTTPBasicAuth
 from Cryptodome.Cipher import PKCS1_OAEP, AES
 from Cryptodome.Random import get_random_bytes
@@ -16,6 +15,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
+from urllib3.exceptions import InsecureRequestWarning
 
 clear = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
@@ -58,8 +58,10 @@ def connect_server_send( file_name: str , file_data: bytes ) -> bool:
     """
     try:
         #if random.randrange(1,10) > 8: raise Exception("Generated Random Network Error")   # create random failed transfer   
-        ftp = ftplib.FTP()  # use init will use port 21 , hence use connect()
+        ftp = ftplib.FTP_TLS()  # use init will use port 21 , hence use connect()
         ftp.connect(SERVERHOST, FTPPORT) # use high port 2121 instead of 21
+        ftp.auth()
+        ftp.prot_p()
         ftp.login(user="acgadmin", passwd='ftpP@$$w0rd')
         ftp.storbinary('STOR ' + file_name, io.BytesIO(file_data))
         ftp.quit()
@@ -79,6 +81,7 @@ def get_picture() -> bytes:
     else:
         return base64.b64decode(my_pict)
 
+requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 def initialConn():
     clear()
     # username = input("Please Enter KDC's Username: ")
@@ -86,7 +89,7 @@ def initialConn():
     username="acgadmin"
     password="P@$$w0rd"
 
-    CIPubKeyRESP = requests.get(f'http://{APIHOST}/CIPubKey', auth=HTTPBasicAuth(username, password))
+    CIPubKeyRESP = requests.get(f'https://{APIHOST}/CIPubKey', auth=HTTPBasicAuth(username, password), verify=False)
     while not CIPubKeyRESP.ok:
         username = input("Incorrect Username or Password!\nPlease Enter KDC's Username: ")
         password = getpass.getpass("Please Enter KDC's Password: [HIDDEN]")
@@ -97,13 +100,13 @@ def initialConn():
     received = conn.recv(4096).decode("utf-8")
     if "Listening for status" in received:
         conn.send(f"{CAMERA_ID}:starting key exchange".encode())
-        pubKeyresponse = requests.post(f'http://{APIHOST}/client-key', json={"clientID": CAMERA_ID, "clientPubKey": clientPubKey}, auth=HTTPBasicAuth(username, password))
+        pubKeyresponse = requests.post(f'https://{APIHOST}/client-key', json={"clientID": CAMERA_ID, "clientPubKey": clientPubKey}, auth=HTTPBasicAuth(username, password), verify=False)
 
         if pubKeyresponse.text == "success":
             received = conn.recv(4096).decode("utf-8")
             conn.send("PubKey sent success".encode())
             if "ServerPubKey sent success" in received:
-                serverCertRESP = requests.get(f'http://{APIHOST}/retr-server-cert/{CAMERA_ID}', auth=HTTPBasicAuth(username, password))
+                serverCertRESP = requests.get(f'https://{APIHOST}/retr-server-cert/{CAMERA_ID}', auth=HTTPBasicAuth(username, password), verify=False)
                 serverCert = x509.load_pem_x509_certificate(serverCertRESP.json()["cert"].encode(), backend=default_backend())
                 try:
                     CIPubKey.verify(serverCert.signature, serverCert.tbs_certificate_bytes, padding.PKCS1v15(), serverCert.signature_hash_algorithm)
