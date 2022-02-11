@@ -84,13 +84,6 @@ class keySchema(ma.Schema):
 key_schema = keySchema()
 keys_schema = keySchema(many=True)
 
-# --------------------- FOR TESTING -----------------------------
-# @app.route('/clientget', methods=['GET'])
-# def tempget():
-#     allget= Key.query.all()
-#     result = keys_schema.dump(allget)
-#     return jsonify(result)
-
 @auth.verify_password
 def authentication(uname,pword):
     if uname and pword:
