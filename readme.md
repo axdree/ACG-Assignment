@@ -1,10 +1,15 @@
-To Prepare
-1) Unzip the assignment_base.zip to a folder  e.g. ~/Desktop/ACG
-2) Install Python 3.9 or later
-3) Install required package(s) using the command [pip install -r requirements.txt] as the file requirements.txt can be found in ~/Desktop/ACG
+To Setup
+-  Run Setup.bat in each folder
 
 
 To Run
+- Run startNAME.bat in each folder in this order:
+    1. PKI
+    2. Server
+    3. Client
+
+
+IGNORE THIS
 1) Open a new terminal window and change directory into ~/Desktop/ACG/source/server/
 2) Run the command [python -m server.py] to start the server.
 
