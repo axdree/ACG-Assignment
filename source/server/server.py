@@ -1,15 +1,21 @@
-import socketserver, threading, requests, time
+import socketserver, threading, requests, time, pickle, os
 from requests.auth import HTTPBasicAuth
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
 from Cryptodome.PublicKey import RSA
+from Cryptodome.Cipher import PKCS1_OAEP, AES
+from Cryptodome.Util.Padding import pad, unpad
+from Cryptodome.Signature import pkcs1_15 
+from Cryptodome.Hash import SHA256
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
+
+scriptpath = os.path.dirname(os.path.abspath(__file__))
 
 clientPubKeys = {}
 serverPrivKeys = {}
@@ -24,6 +30,13 @@ if not CIPubKeyRESP.ok:
     print("Error Connecting/Authenticating with Certificate Issuer")
     exit()
 CIPubKey = load_pem_public_key(CIPubKeyRESP.json()['key'].encode(), default_backend())
+
+class imagePayload():
+    def __init__(self):
+        self.aesSessionKey = ""
+        self.aesiVector = ""
+        self.encImage = ""
+        self.signature = ""
 
 def generateKeypair():
     keypair = RSA.generate(2048)
@@ -85,26 +98,53 @@ class Service(socketserver.BaseRequestHandler):
 class ThreadedService(socketserver.ThreadingMixIn, socketserver.TCPServer, socketserver.DatagramRequestHandler):
     pass
 
+class subclassedHandler(FTPHandler):
+    def on_file_received(self, file):
+        cameraID = os.path.basename(file).split("_")[0]
+        with open(file, "rb+") as f:
+            data = f.read()
+            imgPayload = pickle.loads(data)
+            rsaKey = RSA.importKey(serverPrivKeys[cameraID])
+            rsaCipher = PKCS1_OAEP.new(rsaKey)
+            if type(imgPayload) == imagePayload:
+                AESsessionkey = rsaCipher.decrypt(imgPayload.aesSessionKey)
+                AEScipher = AES.new(AESsessionkey, AES.MODE_CBC, iv=imgPayload.aesiVector)
+                decryptedAESCipher = unpad(AEScipher.decrypt(imgPayload.encImage), 16)
+
+                shaDigest = SHA256.new(decryptedAESCipher)
+                sigKey = RSA.importKey(clientPubKeys[cameraID])
+                sigVerifier = pkcs1_15.new(sigKey)
+                try:
+                    sigVerifier.verify(shaDigest, imgPayload.signature)
+                except:
+                    return super().on_file_received(file)
+        f.close()
+        os.remove(file)
+        with open(file + ".jpg", "wb+") as imgFile:
+            imgFile.write(decryptedAESCipher)
+        imgFile.close()
+
+        return super().on_file_received(file)
 
 def main():
     host = '0.0.0.0'
     port = 2222
 
     socketserver.TCPServer.allow_reuse_address = True
-    server = ThreadedService((host, port), Service)    
-    server.allow_reuse_address = True
-    server_thread = threading.Thread(target = server.serve_forever)
-    server_thread.daemon = True
-    server_thread.start()
+    sockserver = ThreadedService((host, port), Service)    
+    sockserver.allow_reuse_address = True
+    sockserver_thread = threading.Thread(target = sockserver.serve_forever)
+    sockserver_thread.daemon = True
+    sockserver_thread.start()
     
     print(f"Server started on Host: {host} and Port: {port}")
 
     authorizer = DummyAuthorizer() # handle permission and user
-    authorizer.add_anonymous("./data/" , perm='adfmwM')
-    handler = FTPHandler #  understand FTP protocol
+    authorizer.add_user("acgadmin", "ftpP@$$w0rd", scriptpath + "/data/", perm="adfmwM")
+    handler = subclassedHandler #  understand FTP protocol
     handler.authorizer = authorizer
-    server = FTPServer(("127.0.0.1", 2121), handler) # bind to high port, port 21 need root permission
-    server.serve_forever()
+    ftpserver = FTPServer(("0.0.0.0", 2121), handler) # bind to high port, port 21 need root permission
+    ftpserver.serve_forever()
 
 if __name__ == "__main__":
     main()

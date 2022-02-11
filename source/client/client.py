@@ -60,7 +60,7 @@ def connect_server_send( file_name: str , file_data: bytes ) -> bool:
         #if random.randrange(1,10) > 8: raise Exception("Generated Random Network Error")   # create random failed transfer   
         ftp = ftplib.FTP()  # use init will use port 21 , hence use connect()
         ftp.connect(SERVERHOST, FTPPORT) # use high port 2121 instead of 21
-        ftp.login()  # ftp.login(user="anonymous", passwd = 'anonymous@')
+        ftp.login(user="acgadmin", passwd='ftpP@$$w0rd')
         ftp.storbinary('STOR ' + file_name, io.BytesIO(file_data))
         ftp.quit()
         return True
@@ -113,7 +113,8 @@ def initialConn():
                     exit()
                 serverPubKeyObj = serverCert.public_key()
                 global serverPubKey
-                serverPubKey = serverPubKeyObj.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+                tmpserverPubKey = serverPubKeyObj.public_bytes(encoding=serialization.Encoding.PEM, format=serialization.PublicFormat.SubjectPublicKeyInfo).decode()
+                serverPubKey = RSA.importKey(tmpserverPubKey)
                 serverVerification = conn.recv(4096).decode("utf-8")
                 if "verification success" in serverVerification:
                     conn.send("verification success".encode())
@@ -128,7 +129,8 @@ def initialConn():
 
 clear()
 print("Please Wait... Generating Keys...")
-clientPubKey, clientPrivKey = generateKeypair()
+clientPubKey, tmpclientPrivKey = generateKeypair()
+clientPrivKey = RSA.importKey(tmpclientPrivKey)
 initialConn()
 
 while True: # Main function
@@ -138,7 +140,7 @@ while True: # Main function
             time.sleep(10) # sleep for 10 sec if there is no image
             print("Random no motion detected")
         else:
-            f_name = str(CAMERA_ID) + "_" +  datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S.jpg" ) 
+            f_name = str(CAMERA_ID) + "_" +  datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S") 
             # AES ENCRYPTION
             sessionKey = get_random_bytes(KEYSIZE)
             iVector = get_random_bytes(BLOCK_SIZE)
@@ -147,7 +149,7 @@ while True: # Main function
 
             # ENCRYPT AES SESSION KEY WITH RSA
             RSAcipher = PKCS1_OAEP.new(serverPubKey)
-            RSAcipherENC = RSAcipher.encrypt(AEScipherENC)
+            RSAcipherENC = RSAcipher.encrypt(sessionKey)
 
             # CREATE SIGNATURE
             shaDigest =  SHA256.new(my_image)
@@ -155,7 +157,7 @@ while True: # Main function
 
             # Create object
             imgPayload = imagePayload()
-            imgPayload.aesSessionKey = sessionKey
+            imgPayload.aesSessionKey = RSAcipherENC
             imgPayload.aesiVector = iVector
             imgPayload.encImage = AEScipherENC
             imgPayload.signature = signerSigned
