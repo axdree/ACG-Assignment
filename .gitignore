@@ -1,0 +1,3 @@
+./source/PKI/.venv/*
+./source/client/.venv/*
+./source/server/.venv/*
