@@ -28,7 +28,7 @@ with open(f"{scriptpath}/CIpublic.pem", "rb") as key_file:
     
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///keysdb.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{scriptpath}/keysdb.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
