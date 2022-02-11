@@ -1,9 +1,9 @@
 # To Setup
--  Run Setup.bat in each folder
+-  Run `setup.bat` in each folder
 
 
 # To Run
-- Run startNAME.bat in each folder in this order:
+- Run `start<NAME>.bat` in each folder in this order:
     1. PKI
     2. Server
     3. Client
