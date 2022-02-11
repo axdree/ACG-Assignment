@@ -1,4 +1,4 @@
-import datetime, hashlib
+import datetime, hashlib, os
 from flask import Flask, jsonify, request
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy 
@@ -14,13 +14,15 @@ from cryptography.hazmat.primitives import serialization, hashes
 username = "acgadmin"
 password = "6b283bb060c269432d08ac33b47a337c0a40035d"
 
+scriptpath = os.path.dirname(os.path.abspath(__file__))
+
 #CI's Private key pre-generated
-with open("private.pem", "rb") as key_file:
+with open(f"{scriptpath}/private.pem", "rb") as key_file:
     CIprivkey = serialization.load_pem_private_key(
         key_file.read(),
         password=None,
     )
-with open("CIpublic.pem", "rb") as key_file:
+with open(f"{scriptpath}/CIpublic.pem", "rb") as key_file:
     CIpubkeyPlainText = key_file.read()
     CIpubkey = serialization.load_pem_public_key(CIpubkeyPlainText)  
     
