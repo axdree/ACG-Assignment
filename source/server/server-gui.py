@@ -179,7 +179,7 @@ class serverGUIObj():
                 timesincelbl.config(text=f"Time Since Last Image: {int(int(self.ctr[cameraID]) / 2)} Second(s)")
                 self.currentimg[cameraID] = latestImage[cameraID]
             except Exception as e:
-                print("err", e)
+                pass
             newWindow.after(500, lambda:imgUpdater(cameraID))
             
         newWindow = Toplevel(self.GUI)
