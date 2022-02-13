@@ -1,5 +1,7 @@
+from cgitb import text
 import socketserver, threading, requests, pickle, os
 from tkinter import *
+import tkinter.messagebox
 from PIL import Image, ImageTk
 from requests.auth import HTTPBasicAuth
 from urllib3.exceptions import InsecureRequestWarning
@@ -133,6 +135,9 @@ class subclassedHandler(TLS_FTPHandler):
 class serverGUIObj():
     def __init__(self):
         self.buttonsmade = []
+        self.currentimg = {}
+        self.errSent = False
+        self.ctr = {}
         self.GUI = Tk()
         self.GUI.title("ACG-Assignment (Server) GUI")
         self.GUI.configure(background="#4b4c4c")
@@ -146,15 +151,32 @@ class serverGUIObj():
         self.GUI.mainloop()
 
     def cameraWindow(self, cameraID):
+        self.currentimg[cameraID] = ""
         def imgUpdater(cameraID):
             try:
+                if self.currentimg[cameraID] == latestImage[cameraID]:
+                    if self.ctr[cameraID] >= 120:
+                        if self.errSent:
+                            self.ctr[cameraID] += 1
+                        else:
+                            tkinter.messagebox.showerror(title=f"Camera {cameraID} Status", message=f"Camera {cameraID} has not sent an image in over {int(int(self.ctr[cameraID]) / 2)} Seconds ")
+                            self.errSent = True
+                            self.ctr[cameraID] += 1
+                    else:
+                        self.ctr[cameraID] += 1
+                else:
+                    self.ctr[cameraID] = 0
+                    self.errSent = False
+
                 im = Image.open(latestImage[cameraID])
                 resizedIM = im.resize((300,300), Image.ANTIALIAS)
                 self.photo = ImageTk.PhotoImage(resizedIM)
                 canvas.create_image(150,150, image=self.photo)
                 filenamelbl.config(text="Filename: " + os.path.basename(latestImage[cameraID]))
+                timesincelbl.config(text=f"Time Since Last Image: {int(int(self.ctr[cameraID]) / 2)} Second(s)")
+                self.currentimg[cameraID] = latestImage[cameraID]
             except Exception as e:
-                print("e", e)
+                print("err", e)
             newWindow.after(500, lambda:imgUpdater(cameraID))
             
         newWindow = Toplevel(self.GUI)
@@ -167,14 +189,17 @@ class serverGUIObj():
         filenamelbl = Label(newWindow, text="", bg="#4b4c4c", fg="white", font="none 14 bold", anchor=CENTER)
         filenamelbl.pack()
         canvas = Canvas(newWindow, width=300, height=300, bg="#4b4c4c")
-        canvas.pack()
+        canvas.pack(pady=15)
+        timesincelbl = Label(newWindow, text="Time Since Last Image: 0 Second(s)", bg="#4b4c4c", fg="white", font="none 10", anchor=S)
+        timesincelbl.pack(pady=15)
         imgUpdater(cameraID)
 
     def btnUpdater(self):
         for camera in clientPubKeys.keys():
             if camera not in self.buttonsmade:
                 btn = Button(self.GUI, height=4, width=15, text= f"Camera {camera}", command=lambda x=camera: self.cameraWindow(x))
-                btn.pack()
+                btn.pack(pady=5)
+                self.ctr[camera] = 0
                 self.buttonsmade.append(camera)
         self.GUI.after(3000, self.btnUpdater)
 

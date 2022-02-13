@@ -76,13 +76,13 @@ def get_picture():
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 def initialConn():
     clear()
-    username = input("\x1b[92mPlease Enter KDC's Username:\x1b[0m ")
-    password = getpass.getpass("\x1b[92mPlease Enter KDC's Password: [HIDDEN]\x1b[0m")
+    username = input("\x1b[92mPlease Enter Certificate Issuer's Username:\x1b[0m ")
+    password = getpass.getpass("\x1b[92mPlease Enter Certificate Issuer's Password: [HIDDEN]\x1b[0m")
 
     CIPubKeyRESP = requests.get(f'https://{APIHOST}/CIPubKey', auth=HTTPBasicAuth(username, password), verify=False)
     while not CIPubKeyRESP.ok:
-        username = input("\n\n\x1b[91mIncorrect Username or Password!\x1b[92m\n\x1b[92mPlease Enter KDC's Username:\x1b[0m ")
-        password = getpass.getpass("\x1b[92mPlease Enter KDC's Password: [HIDDEN]\x1b[0m")
+        username = input("\n\n\x1b[91mIncorrect Username or Password!\x1b[92m\n\x1b[92mPlease Enter Certificate Issuer's Username:\x1b[0m ")
+        password = getpass.getpass("\x1b[92mPlease Enter Certificate Issuer's Password: [HIDDEN]\x1b[0m")
     CIPubKey = load_pem_public_key(CIPubKeyRESP.json()['key'].encode(), default_backend())
 
     clear()
