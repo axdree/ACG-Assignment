@@ -1,7 +1,7 @@
 #SAMPLE KDC ACCOUNT FOR TESTING
 #USERNAME: acgadmin
 #PASSWORD: P@$$w0rd
-#SAMPLE ftp ACCOUNT FOR TESTING
+#SAMPLE FTP ACCOUNT FOR TESTING
 #USERNAME: acgadmin
 #PASSWORD: ftpP@$$w0rd
 import base64, time, datetime, ftplib, io, random, getpass, requests, socket, os, pickle
