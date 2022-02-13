@@ -19,7 +19,6 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.exceptions import InvalidSignature
 
-
 scriptpath = os.path.dirname(os.path.abspath(__file__))
 
 clientPubKeys = {}
@@ -209,7 +208,6 @@ def main():
     ftpThread.start()
 
     serverGUIObj()
-
 
 if __name__ == "__main__":
     main()
