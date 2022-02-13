@@ -1,5 +1,6 @@
 1. [Instructions - Automated Setup and Run with batch files. (Windows)](#instructions---automated-setup-and-run-with-batch-files-windows)
-2. [Instructions - Manual Setup and install.](#instructions---manual-setup-and-install)
+2. [Instructions - Automated Setup and Run with bash files. (Linux)](#instructions---automated-setup-and-run-with-batch-files-linux)
+3. [Instructions - Manual Setup and install.](#instructions---manual-setup-and-install)
 
 # Instructions - Automated Setup and Run with batch files. (Windows)
 ## To Setup
@@ -11,6 +12,7 @@
     2. Server
     3. Client
 
+
 # Instructions - Automated Setup and Run with bash files. (Linux)
 ## To Setup
 -  Run `setup.sh` in each folder
@@ -20,6 +22,7 @@
     1. PKI
     2. Server
     3. Client
+
 
 # Instructions - Manual Setup and install.
 ## To Setup
