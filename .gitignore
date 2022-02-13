@@ -1,2 +1,3 @@
 **/**/.venv/ 
 source/PKI/*.sqlite
+source/server/data/
