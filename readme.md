@@ -2,6 +2,8 @@
 2. [Instructions - Automated Setup and Run with bash files. (Linux)](#instructions---automated-setup-and-run-with-batch-files-linux)
 3. [Instructions - Manual Setup and install.](#instructions---manual-setup-and-install)
 
+Please Ensure you have [Python 3.10+!](https://www.python.org/downloads/release/python-3102/)
+
 # Instructions - Automated Setup and Run with batch files. (Windows)
 ## To Setup
 -  Run `setup.bat` in each folder
@@ -26,11 +28,11 @@
 
 # Instructions - Manual Setup and install.
 ## To Setup
-- Open a Command Prompt / Terminal and CD into the directory of each script
-- Run `python -m venv .venv`
+1. Open a Command Prompt / Terminal and CD into the directory of each script
+2. Run `python -m venv .venv`
 On Windows:
-- Run `.venv/Scripts/activate.bat`
+3. Run `.venv/Scripts/activate.bat`
 On Linux:
-- Run `source .venv/bin/activate`
-- In the virutal environment, run `python -m pip install -r requirements.txt`
-- Start the script with `python <SCRIPTNAME>`
+3. Run `source .venv/bin/activate`
+4. In the virutal environment, run `python -m pip install -r requirements.txt`
+5. Start the script with `python <SCRIPTNAME>`
