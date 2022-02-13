@@ -55,6 +55,9 @@ class Service(socketserver.BaseRequestHandler):
 
             try:
                 print(f"[CONNECTION STARTED] {self.client_address[0]} has connected from port {self.client_address[1]}.")
+                hashstatus = self.receive("Connection Established. Listening for hash.")
+                if hashstatus != "3ec1a23517e9d380ca82f0c00d391111027eef0f":
+                    exitConn()
                 firstStatus = self.receive("Connection Established. Listening for status.")
                 if "starting key exchange" in firstStatus:
                     cameraID = firstStatus.split(":")[0]
