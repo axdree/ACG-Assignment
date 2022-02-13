@@ -1,8 +1,8 @@
 import datetime, hashlib, os
-from flask import Flask, jsonify, request
+from flask import Flask, request
 from flask_marshmallow import Marshmallow
 from flask_sqlalchemy import SQLAlchemy 
-from flask_restful import Api, Resource
+from flask_restful import Api
 from flask_httpauth import HTTPBasicAuth
 from cryptography import x509
 from cryptography.x509.oid import NameOID

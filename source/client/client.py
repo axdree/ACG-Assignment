@@ -8,7 +8,7 @@ import base64, time, datetime, ftplib, io, random, getpass, requests, socket, os
 from requests.auth import HTTPBasicAuth
 from Cryptodome.Cipher import PKCS1_OAEP, AES
 from Cryptodome.Random import get_random_bytes
-from Cryptodome.Util.Padding import pad, unpad
+from Cryptodome.Util.Padding import pad
 from Cryptodome.Hash import SHA256
 from Cryptodome.Signature import pkcs1_15 
 from Cryptodome.PublicKey import RSA

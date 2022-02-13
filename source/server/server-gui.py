@@ -1,5 +1,4 @@
-from cgitb import text
-import socketserver, threading, requests, time, pickle, os
+import socketserver, threading, requests, pickle, os
 from tkinter import *
 from PIL import Image, ImageTk
 from requests.auth import HTTPBasicAuth
@@ -9,7 +8,7 @@ from pyftpdlib.servers import FTPServer
 from pyftpdlib.handlers import TLS_FTPHandler
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP, AES
-from Cryptodome.Util.Padding import pad, unpad
+from Cryptodome.Util.Padding import unpad
 from Cryptodome.Signature import pkcs1_15 
 from Cryptodome.Hash import SHA256
 from cryptography import x509
