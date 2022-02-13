@@ -2,7 +2,7 @@
 
 Contents:
 1. [Instructions - Automated Setup and Run with batch files. (Windows)](#instructions---automated-setup-and-run-with-batch-files-windows)
-2. [Instructions - Automated Setup and Run with bash files. (Linux)](#instructions---automated-setup-and-run-with-batch-files-linux)
+2. [Instructions - Automated Setup and Run with bash files. (Linux)](#instructions---automated-setup-and-run-with-bash-files-linux)
 3. [Instructions - Manual Setup and install.](#instructions---manual-setup-and-install)
 
 Please Ensure you have [Python 3.10+!](https://www.python.org/downloads/release/python-3102/)
