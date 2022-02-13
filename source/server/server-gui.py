@@ -140,8 +140,10 @@ class serverGUIObj():
         self.GUI.configure(background="#4b4c4c")
         self.GUI.minsize(600,500)
         self.GUI.resizable(0,0)
-        lbl1 = Label(self.GUI, text="Available Cameras", anchor=CENTER)
-        lbl1.pack(pady=20)
+        lbl1 = Label(self.GUI, text="Available Cameras", bg="#4b4c4c", fg="orange", font="none 14 bold", anchor=CENTER)
+        lbl1.pack(pady=10)
+        lbl2 = Label(self.GUI, text="Click to view live feed", bg="#4b4c4c", fg="white", font="none 10", anchor=CENTER)
+        lbl2.pack(pady=10)
         self.btnUpdater()
         self.GUI.mainloop()
 
@@ -152,7 +154,7 @@ class serverGUIObj():
                 resizedIM = im.resize((300,300), Image.ANTIALIAS)
                 self.photo = ImageTk.PhotoImage(resizedIM)
                 canvas.create_image(150,150, image=self.photo)
-                imglbl.config(text="Filename: " + os.path.basename(latestImage[cameraID]))
+                filenamelbl.config(text="Filename: " + os.path.basename(latestImage[cameraID]))
             except Exception as e:
                 print("e", e)
             newWindow.after(500, lambda:imgUpdater(cameraID))
@@ -162,18 +164,18 @@ class serverGUIObj():
         newWindow.configure(background="#4b4c4c")
         newWindow.minsize(400,400)
         newWindow.resizable(0,0)
-        camlbl = Label(newWindow, text=f"Live Feed for: {cameraID}", anchor=CENTER)
+        camlbl = Label(newWindow, text=f"Live Feed for: {cameraID}", bg="#4b4c4c", fg="white", font="none 14 bold", anchor=CENTER)
         camlbl.pack(pady=10)
-        imglbl = Label(newWindow, text="", anchor=CENTER)
-        imglbl.pack()
-        canvas = Canvas(newWindow, width=300, height=300)
+        filenamelbl = Label(newWindow, text="", bg="#4b4c4c", fg="white", font="none 14 bold", anchor=CENTER)
+        filenamelbl.pack()
+        canvas = Canvas(newWindow, width=300, height=300, bg="#4b4c4c")
         canvas.pack()
         imgUpdater(cameraID)
 
     def btnUpdater(self):
         for camera in clientPubKeys.keys():
             if camera not in self.buttonsmade:
-                btn = Button(self.GUI, height=5, width=5, text= f"Camera {camera}", command=lambda x=camera: self.cameraWindow(x))
+                btn = Button(self.GUI, height=4, width=15, text= f"Camera {camera}", command=lambda x=camera: self.cameraWindow(x))
                 btn.pack()
                 self.buttonsmade.append(camera)
         self.GUI.after(3000, self.btnUpdater)
