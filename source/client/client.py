@@ -48,14 +48,7 @@ def generateKeypair():
     privKey = keypair.exportKey().decode()
     return pubKey, privKey
 
-def connect_server_send( file_name: str , file_data: bytes ) -> bool:
-    """This function send file_data using FTP and save it as file_name in the remote server. It will simulate intermittent transfer. 
-    Args:
-        file_name (str): file_name of file save in server as a String
-        file_data (bytes): content of file as byte array
-    Returns:
-        bool: True if send, False otherwise
-    """
+def connect_server_send( file_name: str , file_data: bytes ):
     try:
         #if random.randrange(1,10) > 8: raise Exception("Generated Random Network Error")   # create random failed transfer   
         ftp = ftplib.FTP_TLS()  # use init will use port 21 , hence use connect()
@@ -70,11 +63,7 @@ def connect_server_send( file_name: str , file_data: bytes ) -> bool:
         print(e, "while sending", file_name )
         return False
 
-def get_picture() -> bytes:
-    """This function simulate a motion activated camera unit.  It will return 0 byte if no motion is detected.
-    Returns:
-        bytes: a byte array of a photo or 0 byte no motion detected
-    """    
+def get_picture():
     time.sleep(1) # simulate slow processor
     if random.randrange(1,10) > 8:  # simulate no motion detected
         return b''
@@ -84,16 +73,31 @@ def get_picture() -> bytes:
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 def initialConn():
     clear()
-    # username = input("Please Enter KDC's Username: ")
-    # password = getpass.getpass("Please Enter KDC's Password: [HIDDEN]")
-    username="acgadmin"
-    password="P@$$w0rd"
+    username = input("\x1b[92mPlease Enter KDC's Username:\x1b[0m ")
+    password = getpass.getpass("\x1b[92mPlease Enter KDC's Password: [HIDDEN]\x1b[0m")
 
     CIPubKeyRESP = requests.get(f'https://{APIHOST}/CIPubKey', auth=HTTPBasicAuth(username, password), verify=False)
     while not CIPubKeyRESP.ok:
-        username = input("Incorrect Username or Password!\nPlease Enter KDC's Username: ")
-        password = getpass.getpass("Please Enter KDC's Password: [HIDDEN]")
+        username = input("\n\n\x1b[91mIncorrect Username or Password!\x1b[92m\n\x1b[92mPlease Enter KDC's Username:\x1b[0m ")
+        password = getpass.getpass("\x1b[92mPlease Enter KDC's Password: [HIDDEN]\x1b[0m")
     CIPubKey = load_pem_public_key(CIPubKeyRESP.json()['key'].encode(), default_backend())
+
+    clear()
+    ftpusername = input("\x1b[92mPlease Enter FTP's Username:\x1b[0m ")
+    ftppassword = getpass.getpass("\x1b[92mPlease Enter FTP's Password: [HIDDEN]\x1b[0m")
+    while True:
+        try:
+            ftp = ftplib.FTP_TLS()  # use init will use port 21 , hence use connect()
+            ftp.connect(SERVERHOST, FTPPORT)
+            ftp.login(user=ftpusername, passwd=ftppassword)
+            ftp.quit()
+            break
+        except ftplib.error_perm:
+            ftpusername = input("\n\n\x1b[91mIncorrect Username or Password!\x1b[0m\n\x1b[92mPlease Enter FTP's Username:\x1b[0m ")
+            ftppassword = getpass.getpass("\x1b[92mPlease Enter FTP's Password: [HIDDEN]\x1b[0m")
+        except:
+            print("\x1b[91mError Authenticating with FTPS Server. Exiting App\x1b[0m")
+            exit()
 
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     conn.connect((SERVERHOST, int(SOCKETPORT)))
@@ -131,7 +135,7 @@ def initialConn():
 
 
 clear()
-print("Please Wait... Generating Keys...")
+print("\x1b[96mPlease Wait... Generating Keys...\x1b[0m")
 clientPubKey, tmpclientPrivKey = generateKeypair()
 clientPrivKey = RSA.importKey(tmpclientPrivKey)
 initialConn()
